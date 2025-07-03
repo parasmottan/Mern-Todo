@@ -15,7 +15,7 @@ export const fetchTodos = createAsyncThunk(
     const token = state.auth.user.token;
 
     try {
-      const res = await axios.get('http://localhost:5000/api/todos', {
+      const res = await axios.get('https://mern-todo-backend-e9lb.onrender.com/api/todos', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -61,7 +61,7 @@ export const deleteTodo = createAsyncThunk(
     const token = state.auth.user.token;
 
     try {
-      await axios.delete(`http://localhost:5000/api/todos/${id}`, {
+      await axios.delete(`https://mern-todo-backend-e9lb.onrender.com/api/todos/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
