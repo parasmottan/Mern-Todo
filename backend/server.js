@@ -9,7 +9,7 @@ const app = express();
 
 // CORS
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'https://mern-todo-backend-e9lb.onrender.com',
   credentials: true,
 }));
 
