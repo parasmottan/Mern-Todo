@@ -8,7 +8,7 @@ dotenv.config();
 const app = express();
 
 // CORS
-const cors = require('cors');
+
 
 const allowedOrigins = ['https://mern-todo-frontend-seven-ochre.vercel.app'];
 
