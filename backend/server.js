@@ -9,7 +9,7 @@ const app = express();
 
 // CORS
 app.use(cors({
-  origin: 'https://mern-todo-backend-e9lb.onrender.com',
+  origin: 'https://mern-todo-frontend-seven-ochre.vercel.app/',
   credentials: true,
 }));
 
