@@ -2,7 +2,7 @@ import axios from 'axios';
 
 
 const instance = axios.create({
-  baseURL: 'https://mern-todo-frontend-seven-ochre.vercel.app/',
+ baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
