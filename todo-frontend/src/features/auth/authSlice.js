@@ -8,6 +8,7 @@ const initialState = {
   message: null,
 };
 
+<<<<<<< HEAD
 // ✅ Register User
 export const registerUser = createAsyncThunk(
   'auth/register',
@@ -18,9 +19,19 @@ export const registerUser = createAsyncThunk(
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data?.message || 'Registration failed');
     }
+=======
+// Register User
+export const registerUser = createAsyncThunk('auth/register', async (userData, thunkAPI) => {
+  try {
+    const res = await axios.post('/auth/register', userData);
+    return res.data;
+  } catch (err) {
+    return thunkAPI.rejectWithValue(err.response?.data?.message || 'Registration failed');
+>>>>>>> 49777850e4fb3851217e1b13adca0632c232f79e
   }
 );
 
+<<<<<<< HEAD
 // ✅ Login User
 export const loginUser = createAsyncThunk(
   'auth/login',
@@ -34,6 +45,15 @@ export const loginUser = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data?.message || 'Login failed');
     }
+=======
+// Login User
+export const loginUser = createAsyncThunk('auth/login', async (userData, thunkAPI) => {
+  try {
+    const res = await axios.post('/auth/login', userData, { withCredentials: true });
+    return res.data;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.response?.data?.message || 'Login failed');
+>>>>>>> 49777850e4fb3851217e1b13adca0632c232f79e
   }
 );
 
