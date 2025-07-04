@@ -11,13 +11,13 @@ const generateToken = (id) => {
   });
 };
 
-// 🧁 Set Token Cookie and Response
+// 🧁 Set Token Cookie and Response (Ye function abhi bhi use ho raha hai loginUser mein)
 const sendToken = (res, user) => {
   const token = generateToken(user._id);
 
   res.cookie('token', token, {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV === 'production', // Production mein secure: true rakho
     sameSite: 'Lax',
     maxAge: 10 * 24 * 60 * 60 * 1000,
   });
@@ -26,7 +26,7 @@ const sendToken = (res, user) => {
     _id: user._id,
     name: user.name,
     email: user.email,
-    token,
+    token, // Token bhi bhej do client side pe
   });
 };
 
@@ -53,22 +53,24 @@ const registerUser = async (req, res) => {
       verificationOtpExpires: Date.now() + 10 * 60 * 1000, // 10 min
     });
 
+    // Email content for the user
     const message = `Hello ${name},\n\nYour OTP for verifying your account is: ${otp}\n\nIt will expire in 10 minutes.`;
 
     try {
-await sendEmail({
-  to: user.email,
-  subject: 'Your OTP',
-  text: `Your OTP is: ${otp}`, // fallback
-  html: `<h3>Hello ${user.name},</h3><p>Your OTP is: <b>${otp}</b></p>`, // pretty look
-});
+      await sendEmail({
+        to: user.email,
+        subject: 'Your OTP',
+        text: `Your OTP is: ${otp}`, // fallback
+        html: `<h3>Hello ${user.name},</h3><p>Your OTP is: <b>${otp}</b></p>`, // pretty look
+      });
 
       res.status(201).json({
         message: 'User registered. OTP sent to email.',
-        userId: user._id,
+        userId: user._id, // ✅ user._id frontend ko bheja ja raha hai
       });
     } catch (emailErr) {
-      await User.findByIdAndDelete(user._id);
+      await User.findByIdAndDelete(user._id); // Agar email nahi gaya toh user ko delete kar do
+      console.error('❌ Email sending error after registration:', emailErr);
       return res.status(500).json({ message: 'Failed to send OTP email. Please try again.' });
     }
 
@@ -78,7 +80,7 @@ await sendEmail({
   }
 };
 
-// ✅ VERIFY OTP FUNCTION
+// ✅ VERIFY OTP FUNCTION (Updated)
 const verifyOtp = async (req, res) => {
   const { userId, otp } = req.body;
 
@@ -95,33 +97,20 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 
+    // OTP verified successfully, update user status
     user.isVerified = true;
     user.verificationOtp = undefined;
     user.verificationOtpExpires = undefined;
     await user.save();
 
-    // ✅ NEW: User ko login kar do yahan se
-    const token = generateToken(user._id); // Assuming generateToken is available
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Production mein secure: true rakho
-      sameSite: 'Lax',
-      maxAge: 10 * 24 * 60 * 60 * 1000,
-    });
-
-    res.status(200).json({
-      message: 'Email verified successfully!',
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      token, // Token bhi bhej do client side pe, agar Redux mein store karna ho
-    });
+    // ✅ NEW: User ko automatically login kar do
+    sendToken(res, user); // sendToken function user ko cookie set karega aur response bhejne
+                          // jismein user data aur token hoga
   } catch (err) {
     console.error('❌ OTP Verify Error:', err);
     res.status(500).json({ message: 'OTP verification failed' });
   }
 };
-// ...
 
 // ✅ LOGIN WITH VERIFICATION CHECK
 const loginUser = async (req, res) => {
@@ -144,7 +133,7 @@ const loginUser = async (req, res) => {
   }
 };
 
-// ✅ FORGOT PASSWORD
+// ✅ FORGOT PASSWORD (No changes here)
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -166,15 +155,22 @@ const forgotPassword = async (req, res) => {
       <a href="${resetUrl}">${resetUrl}</a>
     `;
 
-    await sendEmail(user.email, 'Password Reset - CodeX Todo', message);
+    // sendEmail function yahan string arguments le raha hai, confirm your sendEmail utility
+    await sendEmail({
+      to: user.email,
+      subject: 'Password Reset - CodeX Todo',
+      text: `Click the link to reset your password: ${resetUrl}`,
+      html: message,
+    });
 
     res.status(200).json({ message: 'Email sent successfully' });
   } catch (err) {
+    console.error('❌ Forgot Password Error:', err);
     res.status(500).json({ message: 'Something Went Wrong' });
   }
 };
 
-// ✅ GET LOGGED-IN USER
+// ✅ GET LOGGED-IN USER (No changes here)
 const getMe = (req, res) => {
   res.status(200).json(req.user);
 };
