@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { loadUserFromStorage } from './features/auth/authSlice';
 import VerifyEmail from './pages/VerifyEmail';
-
+import { Toaster } from 'react-hot-toast';
 
 function App() {
     const dispatch = useDispatch();
@@ -27,6 +27,7 @@ function App() {
       <Route path="/verify-email" element={<VerifyEmail />} />
 
       </Routes>
+        <Toaster />
     </Router>
   );
 }
