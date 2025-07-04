@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { loadUserFromStorage } from './features/auth/authSlice';
+import VerifyEmail from './pages/VerifyEmail';
 
 
 function App() {
@@ -22,7 +23,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/login" element={<Login/>} />
+        <Route path="/login" element={<Login />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
+
       </Routes>
     </Router>
   );

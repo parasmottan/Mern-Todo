@@ -1,28 +1,30 @@
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
 
-const sendEmail = async ({ to, subject, text }) => {
+const sendEmail = async ({ to, subject, text, html }) => {
   try {
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // TLS
       auth: {
-        user: process.env.GMAIL_USER,          // e.g. your@gmail.com
-        pass: process.env.GMAIL_APP_PASSWORD,  // 16-digit app password
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
       },
     });
 
-    const mailOptions = {
-      from: process.env.GMAIL_USER,
+    const info = await transporter.sendMail({
+      from: `"Todo App" <${process.env.GMAIL_USER}>`,
       to,
       subject,
       text,
-    };
+      html,
+    });
 
-    await transporter.sendMail(mailOptions);
+    console.log("✅ Email sent:", info.messageId);
   } catch (err) {
-    console.error("Email sending failed:", err);
-    throw new Error("Email not sent");
+    console.error("❌ Email sending failed:", err);
+    throw new Error("Email sending failed. Please try again.");
   }
 };
 
-module.exports = sendEmail; 
-
+module.exports = sendEmail;

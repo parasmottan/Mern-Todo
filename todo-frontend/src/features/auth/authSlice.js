@@ -5,27 +5,37 @@ const initialState = {
   user: null,
   loading: false,
   error: null,
+  message: null,
 };
 
-// Register User
-export const registerUser = createAsyncThunk('auth/register', async (userData, thunkAPI) => {
-  try {
-    const res = await axios.post('/api/auth/register', userData);
-    return res.data;
-  } catch (err) {
-    return thunkAPI.rejectWithValue(err.response?.data?.message || 'Registration failed');
+// ✅ Register User
+export const registerUser = createAsyncThunk(
+  'auth/register',
+  async (userData, thunkAPI) => {
+    try {
+      const res = await axios.post('/api/auth/register', userData);
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response?.data?.message || 'Registration failed');
+    }
   }
-});
+);
 
-// Login User
-export const loginUser = createAsyncThunk('auth/login', async (userData, thunkAPI) => {
-  try {
-    const res = await axios.post('/api/auth/login', userData, { withCredentials: true });
-    return res.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error.response?.data?.message || 'Login failed');
+// ✅ Login User
+export const loginUser = createAsyncThunk(
+  'auth/login',
+  async (userData, thunkAPI) => {
+    try {
+      const res = await axios.post('/api/auth/login', userData, {
+        withCredentials: true,
+      });
+
+      return res.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || 'Login failed');
+    }
   }
-});
+);
 
 const authSlice = createSlice({
   name: 'auth',
@@ -33,6 +43,7 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       state.user = null;
+      state.message = null;
       localStorage.removeItem('user');
     },
     loadUserFromStorage: (state) => {
@@ -40,29 +51,35 @@ const authSlice = createSlice({
       if (userData) {
         state.user = JSON.parse(userData);
       }
-    }
+    },
+    clearMessages: (state) => {
+      state.message = null;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
-      // Register
+      // ✅ Register
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.message = null;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.loading = false;
-        state.user = action.payload;
-        localStorage.setItem('user', JSON.stringify(action.payload));
+        state.user = null; // wait for email verification
+        state.message = "Registration successful! Please check your email.";
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // Login
+      // ✅ Login
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.message = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
@@ -73,8 +90,8 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       });
-  }
+  },
 });
 
-export const { logout, loadUserFromStorage } = authSlice.actions;
+export const { logout, loadUserFromStorage, clearMessages } = authSlice.actions;
 export default authSlice.reducer;

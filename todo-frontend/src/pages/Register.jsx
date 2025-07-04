@@ -3,24 +3,45 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerUser } from '../features/auth/authSlice';
 import { motion } from 'framer-motion';
+import { toast } from 'react-hot-toast'; // Toast notifications ke liye
 
 function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.auth);
+  const { loading, error, message } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => { // handleSubmit ko async banaya
     e.preventDefault();
-    dispatch(registerUser(form)).then((res) => {
-      if (res.meta.requestStatus === 'fulfilled') {
-        navigate('/dashboard');
+    try {
+      const actionResult = await dispatch(registerUser(form)); // dispatch call ko await kiya
+
+      // Check if the registerUser thunk was fulfilled successfully
+      if (registerUser.fulfilled.match(actionResult)) {
+        const { userId } = actionResult.payload; // Payload se userId extract kiya
+
+        if (userId) {
+          // Agar userId mila, toh navigate karo aur userId ko state mein pass karo
+          navigate('/verify-email', { state: { userId: userId } });
+        } else {
+          // Agar userId payload mein nahi mila, toh error message dikhao
+          toast.error("Registration successful, but user ID missing for verification. Please try again.");
+          console.error("User ID missing from registration response:", actionResult.payload);
+        }
+      } else if (registerUser.rejected.match(actionResult)) {
+        // Agar registration failed, toh error Redux slice se aayega
+        // Yeh error 'error' state mein already handled hai and will be displayed by {error && ...} block
+        console.error("Registration failed:", actionResult.payload);
       }
-    });
+    } catch (err) {
+      // Kisi unexpected error ko handle karein (network issues, etc.)
+      console.error("An unexpected error occurred during registration:", err);
+      toast.error("An unexpected error occurred. Please try again.");
+    }
   };
 
   return (
@@ -31,7 +52,7 @@ function Register() {
         transition={{ duration: 0.6 }}
         className="w-full max-w-4xl bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl flex flex-col sm:flex-row overflow-hidden"
       >
-        {/* LEFT Side - Emoji + Quote */}
+        {/* LEFT Side */}
         <motion.div
           initial={{ x: -80, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -45,7 +66,7 @@ function Register() {
           </p>
         </motion.div>
 
-        {/* RIGHT Side - Form */}
+        {/* RIGHT Side */}
         <motion.div
           initial={{ x: 80, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -65,6 +86,12 @@ function Register() {
           {error && (
             <p className="bg-red-100 text-red-700 text-center px-4 py-2 rounded-lg text-sm mb-4">
               {error}
+            </p>
+          )}
+
+          {message && (
+            <p className="bg-green-100 text-green-700 text-center px-4 py-2 rounded-lg text-sm mb-4">
+              {message}
             </p>
           )}
 
@@ -113,12 +140,11 @@ function Register() {
               Login here
             </Link>
           </p>
-<p className="text-center text-xs text-gray-400 mt-2 italic">
-  🔒 Don’t worry, your data is 100% secure. <br />
-  <span className="text-gray-500">Forgot Password?</span> Feature coming soon!
-</p>
 
-
+          <p className="text-center text-xs text-gray-400 mt-2 italic">
+            🔒 Don’t worry, your data is 100% secure. <br />
+            <span className="text-gray-500">Forgot Password?</span> Feature coming soon!
+          </p>
         </motion.div>
       </motion.div>
     </div>
