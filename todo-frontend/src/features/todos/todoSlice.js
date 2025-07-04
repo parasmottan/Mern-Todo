@@ -13,7 +13,8 @@ export const fetchTodos = createAsyncThunk(
   async (_, thunkAPI) => {
     const token = thunkAPI.getState().auth.user.token;
     try {
-      const res = await axios.get('/todos', {
+      // Yahan '/api' prefix add kiya hai
+      const res = await axios.get('/api/todos', { // <-- CHANGE: /api/todos
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -31,8 +32,9 @@ export const addTodo = createAsyncThunk(
   async (todoText, thunkAPI) => {
     const token = thunkAPI.getState().auth.user.token;
     try {
+      // Yahan '/api' prefix add kiya hai
       const res = await axios.post(
-        '/todos',
+        '/api/todos', // <-- CHANGE: /api/todos
         { text: todoText },
         {
           headers: {
@@ -53,7 +55,8 @@ export const deleteTodo = createAsyncThunk(
   async (id, thunkAPI) => {
     const token = thunkAPI.getState().auth.user.token;
     try {
-      await axios.delete(`/todos/${id}`, {
+      // Yahan '/api' prefix add kiya hai
+      await axios.delete(`/api/todos/${id}`, { // <-- CHANGE: /api/todos/${id}
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -65,7 +68,7 @@ export const deleteTodo = createAsyncThunk(
   }
 );
 
-// ✅ Slice
+// ✅ Slice (No changes here)
 const todoSlice = createSlice({
   name: 'todos',
   initialState,
