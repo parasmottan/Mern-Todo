@@ -8,7 +8,7 @@ import { useDispatch } from "react-redux"; // useDispatch import kiya
 // OTP length define karo
 const OTP_LENGTH = 6;
 
-// Animation variants for Framer Motion (yeh ab component ke andar define kiye hain)
+// Animation variants for Framer Motion (ab component ke andar hi define kiye hain)
 const containerVariants = {
   hidden: { opacity: 0, scale: 0.9 },
   visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut" } },
@@ -48,12 +48,12 @@ const VerifyEmail = () => {
     }
 
     // Focus on the first input box on component mount
-    // Ensure the ref is available before trying to focus
+    // Small delay to ensure inputs are rendered before trying to focus
     const timer = setTimeout(() => {
       if (inputRefs.current[0]) {
         inputRefs.current[0].focus();
       }
-    }, 100); // Small delay to ensure inputs are rendered
+    }, 100); 
 
     return () => clearTimeout(timer); // Cleanup timer on unmount
   }, [location.state, navigate]); // navigate ko dependency se hata sakte ho agar linting warning de
@@ -94,7 +94,6 @@ const VerifyEmail = () => {
     }
   };
 
-
   const handleVerify = async (e) => {
     e.preventDefault();
     const fullOtp = otp.join(""); // Combine all digits into a single string
@@ -119,11 +118,11 @@ const VerifyEmail = () => {
       // Backend se jo user data (including _id, name, email, token) aaya hai
       const userData = res.data;
       
-      // authSlice mein loginUser.fulfilled action ko manually dispatch karo
-      // Taaki Redux state update ho jaye aur user logged in state mein aa jaye
+      // Manual dispatch for loginUser.fulfilled action
+      // This updates Redux state, making the user logged in
       dispatch({ type: 'auth/login/fulfilled', payload: userData });
       
-      // localStorage mein bhi user data save karo (redundant with Redux, but safe)
+      // LocalStorage mein bhi user data save karo (Redux persist ke bina backup)
       localStorage.setItem('user', JSON.stringify(userData)); 
 
       toast.success(userData.message || "Email verified successfully!");
@@ -132,7 +131,7 @@ const VerifyEmail = () => {
       navigate("/dashboard"); // Ab dashboard par navigate karo
     } catch (err) {
       console.error("Verification failed:", err);
-      // Agar error.response.data hai toh uska message dikhao
+      // Agar error.response.data hai toh uska message dikhao (Wrong OTP popup yahan se aayega)
       toast.error(err.response?.data?.message || "Verification failed. Please try again.");
     } finally {
       setLoading(false);
@@ -142,12 +141,12 @@ const VerifyEmail = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex items-center justify-center px-4 py-8 overflow-auto font-sans">
       <motion.div
-        variants={containerVariants} // Variants add kiye
+        variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="w-full max-w-md bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-8 space-y-6 border border-gray-100"
       >
-        <motion.div variants={itemVariants} className="text-center"> {/* Variants add kiye */}
+        <motion.div variants={itemVariants} className="text-center">
           <div className="text-5xl mb-4">📧</div>
           <h2 className="text-3xl font-bold text-gray-800">Verify Your Email</h2>
           <p className="text-md text-gray-500 mt-2">
@@ -157,8 +156,8 @@ const VerifyEmail = () => {
 
         <form onSubmit={handleVerify} className="space-y-6">
           <motion.div
-            variants={itemVariants} 
-            className="flex justify-center space-x-2 md:space-x-3"
+            variants={itemVariants}
+            className="flex justify-center space-x-2 md:space-x-3" // Increased space for bigger boxes
           >
             {otp.map((data, index) => (
               <input
@@ -188,10 +187,10 @@ const VerifyEmail = () => {
           </motion.button>
         </form>
 
-        <motion.p variants={itemVariants} className="text-center text-sm text-gray-500 mt-4"> {/* Variants add kiye */}
+        <motion.p variants={itemVariants} className="text-center text-sm text-gray-500 mt-4">
           Didn't receive the code?{" "}
           <button
-            onClick={() => toast.success("OTP Resend feature coming soon!")}
+            onClick={() => toast.success("OTP Resend feature coming soon!")} // Placeholder for resend logic
             className="text-indigo-600 font-semibold hover:underline focus:outline-none"
           >
             Resend OTP
