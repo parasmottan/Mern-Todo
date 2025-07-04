@@ -7,9 +7,8 @@ const connectDB = require('./config/db');
 dotenv.config();
 const app = express();
 
-<<<<<<< HEAD
 // 🔗 Middleware
-=======
+
 // CORS
 
 
@@ -27,7 +26,7 @@ app.use(cors({
 }));
 
 
->>>>>>> 49777850e4fb3851217e1b13adca0632c232f79e
+
 app.use(express.json());
 app.use(cookieParser());
 
